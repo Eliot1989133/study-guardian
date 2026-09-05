@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>考研小管家</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(160deg,#eef2ff,#fdf2f8,#eff6ff);color:#1f2937;min-height:100vh;padding-bottom:30px;font-size:15px;}
+.hd{background:linear-gradient(135deg,#6366f1,#8b5cf6,#d946ef);color:#fff;padding:22px 18px 18px;border-radius:0 0 22px 22px;}
+.hd .goal{font-size:12px;opacity:.9;}
+.hd .date{font-size:22px;font-weight:700;margin-top:6px;}
+.hd .cd{font-size:13px;margin-top:6px;font-weight:600;}
+.hd .cd b{font-size:18px;color:#fde68a;}
+.wt{background:rgba(217,70,239,.1);color:#c026d3;padding:9px 18px;font-size:13px;font-weight:600;margin:12px 12px 0;border-radius:12px;}
+.sec{font-size:13px;font-weight:700;color:#6366f1;margin:18px 16px 8px;letter-spacing:.5px;}
+.task{background:#fff;margin:0 12px 10px;padding:13px 14px;border-radius:14px;box-shadow:0 1px 3px rgba(17,24,39,.06),0 4px 12px rgba(17,24,39,.04);border:1px solid #f1f2f6;}
+.task .row{display:flex;align-items:flex-start;}
+.task .ck{width:22px;height:22px;border:2px solid #c7d2fe;border-radius:6px;margin-right:11px;flex:none;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;}
+.task .ck.on{background:#6366f1;border-color:#6366f1;}
+.task .t{font-weight:600;font-size:15px;color:#111827;line-height:1.4;}
+.task .t.done{color:#9ca3af;text-decoration:line-through;}
+.task .d{color:#6b7280;font-size:13px;margin-top:5px;line-height:1.55;}
+.task .lk{margin-top:8px;}
+.task .lk a{color:#4f46e5;text-decoration:none;margin:0 8px 4px 0;background:#eef2ff;padding:4px 11px;border-radius:20px;display:inline-block;font-size:12px;}
+.sig{background:#fff;margin:0 12px;border-radius:14px;padding:6px 14px;box-shadow:0 1px 3px rgba(17,24,39,.06);border:1px solid #f1f2f6;}
+.sig .s{font-size:13px;color:#374151;padding:8px 0;border-bottom:1px dashed #f0f0f0;display:flex;align-items:center;}
+.sig .s:last-child{border-bottom:none;}
+.sig .s.cur{background:#eef2ff;border-radius:8px;padding:8px 8px;font-weight:700;color:#4f46e5;}
+.sig .star{color:#f59e0b;margin-left:6px;font-size:12px;}
+.sig .tag{margin-left:auto;font-size:11px;color:#4f46e5;font-weight:700;}
+.qt{background:rgba(255,255,255,.75);margin:12px;padding:12px 14px;border-radius:14px;font-size:13px;color:#6366f1;border-left:3px solid #a78bfa;font-style:italic;}
+.ft{color:#9ca3af;font-size:11px;text-align:center;margin-top:18px;line-height:1.7;}
+.ms{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;margin:10px 12px 0;padding:10px 14px;border-radius:12px;font-size:13px;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="hd">
+  <div class="goal" id="goal"></div>
+  <div class="date" id="date"></div>
+  <div class="cd" id="cd"></div>
+</div>
+<div id="msgs"></div>
+<div class="wt" id="wt" style="display:none"></div>
+<div class="sec">每天固定</div>
+<div id="daily"></div>
+<div class="sec">今日任务</div>
+<div id="tasks"></div>
+<div class="sec">858 信号与系统 进度</div>
+<div class="sig" id="sig"></div>
+<div class="qt" id="quote"></div>
+<div class="ft" id="ft"></div>
+<script>
+const PLAN = {"windowTitle": "今日学习 · 嵌入式工程师之路", "goal": "电子科技大学 电子信息(085400·嵌入式) · 2028 入学 · 嵌入式工程师", "phase": "基础期（2026.8 - 2027.4）· 数学一(高数+线代+概率) · 858 信号与系统", "dayNames": ["周日", "周一", "周二", "周三", "周四", "周五", "周六"], "cats": {"math": "数学一", "signal": "信号与系统", "english": "英语", "embedded": "嵌入式", "python": "Python/AI", "project": "项目（灵弦·生态之瞳）", "review": "复盘"}, "reviewCats": ["math", "signal", "english", "embedded", "python", "project"], "daily": [{"t": "英语单词 50 个", "d": "手机「不背单词」App + 红宝书复习，约 30-40 分钟", "l": [{"n": "红宝书", "u": "https://www.baidu.com/s?wd=%E7%BA%A2%E5%AE%9D%E4%B9%A6%20%E8%80%83%E7%A0%94%E8%8B%B1%E8%AF%AD%E8%AF%8D%E6%B1%87"}, {"n": "不背单词", "u": "https://www.baidu.com/s?wd=%E4%B8%8D%E8%83%8C%E5%8D%95%E8%AF%8D%20App"}], "cat": "english"}], "weekly": [{"theme": "复盘 + 项目规划", "tasks": [{"t": "英语 · 红宝书复习", "d": "本周红宝书生词全部过一遍", "l": [{"n": "红宝书", "u": "https://search.bilibili.com/all?keyword=%E7%BA%A2%E5%AE%9D%E4%B9%A6%20%E8%80%83%E7%A0%94%E8%8B%B1%E8%AF%AD%E8%AF%8D%E6%B1%87"}], "cat": "english"}, {"t": "数学 · 本周错题复盘", "d": "张宇函数极限连续错题，全部重做", "l": [{"n": "张宇高数", "u": "https://search.bilibili.com/all?keyword=%E5%BC%A0%E5%AE%87%20%E9%AB%98%E6%95%B0%20%E5%87%BD%E6%95%B0%20%E6%9E%81%E9%99%90%20%E8%BF%9E%E7%BB%AD"}], "cat": "math"}, {"t": "信号与系统 · 本周回顾", "d": "重做 {CH} 错题，确认无卡点再进下一章", "l": [{"n": "DeepSeek", "u": "https://chat.deepseek.com/"}], "cat": "signal"}, {"t": "项目周复盘 + 下周规划", "d": "灵弦 + 生态之瞳进度，定下周小目标", "l": [{"n": "立创EDA", "u": "https://lceda.cn/"}], "cat": "project"}, {"t": "deepseek 复盘答疑", "d": "本周疑问喂给 deepseek-v4-flash", "l": [{"n": "DeepSeek", "u": "https://chat.deepseek.com/"}], "cat": "review"}]}, {"theme": "张宇高数 + 信号 + 红宝书", "tasks": [{"t": "张宇高数 · 函数·极限·连续（例题）", "d": "张宇练习：函数/极限/连续，看例题+做配套（当前进度）", "l": [{"n": "张宇高数", "u": "https://search.bilibili.com/all?keyword=%E5%BC%A0%E5%AE%87%20%E9%AB%98%E6%95%B0%20%E5%87%BD%E6%95%B0%20%E6%9E%81%E9%99%90%20%E8%BF%9E%E7%BB%AD"}], "cat": "math"}, {"t": "信号与系统 · 学习（{CH}）", "d": "继续学当前章节：概念+例题，没学完不跳章", "l": [{"n": "信号网课", "u": "https://search.bilibili.com/all?keyword=%E4%BF%A1%E5%8F%B7%E4%B8%8E%E7%B3%BB%E7%BB%9F%20%E9%9B%B6%E5%9F%BA%E7%A1%80%20%E9%83%AD%E5%AE%9D%E9%BE%99"}, {"n": "DeepSeek", "u": "https://chat.deepseek.com/"}], "cat": "signal"}, {"t": "信号与系统 · 课后题", "d": "{CH} 课后习题，做完才算完成本章", "l": [{"n": "DeepSeek", "u": "https://chat.deepseek.com/"}], "cat": "signal"}, {"t": "英语 · 红宝书 1 单元", "d": "红宝书精背 1 个单元 + 复习旧词（暂不做真题）", "l": [{"n": "红宝书", "u": "https://search.bilibili.com/all?keyword=%E7%BA%A2%E5%AE%9D%E4%B9%A6%20%E8%80%83%E7%A0%94%E8%8B%B1%E8%AF%AD%E8%AF%8D%E6%B1%87"}], "cat": "english"}]}, {"theme": "张宇高数 + 信号 + 红宝书", "tasks": [{"t": "张宇高数 · 函数·极限·连续（习题）", "d": "张宇练习：习题巩固，错题标注", "l": [{"n": "张宇高数", "u": "https://search.bilibili.com/all?keyword=%E5%BC%A0%E5%AE%87%20%E9%AB%98%E6%95%B0%20%E5%87%BD%E6%95%B0%20%E6%9E%81%E9%99%90%20%E8%BF%9E%E7%BB%AD"}], "cat": "math"}, {"t": "信号与系统 · 学习（{CH}）", "d": "继续学当前章节：概念+例题，没学完不跳章", "l": [{"n": "信号网课", "u": "https://search.bilibili.com/all?keyword=%E4%BF%A1%E5%8F%B7%E4%B8%8E%E7%B3%BB%E7%BB%9F%20%E9%9B%B6%E5%9F%BA%E7%A1%80%20%E9%83%AD%E5%AE%9D%E9%BE%99"}, {"n": "DeepSeek", "u": "https://chat.deepseek.com/"}], "cat": "signal"}, {"t": "信号与系统 · 课后题", "d": "{CH} 课后习题，做完才算完成本章", "l": [{"n": "DeepSeek", "u": "https://chat.deepseek.com/"}], "cat": "signal"}, {"t": "英语 · 红宝书 1 单元", "d": "红宝书精背 1 个单元 + 复习旧词（暂不做真题）", "l": [{"n": "红宝书", "u": "https://search.bilibili.com/all?keyword=%E7%BA%A2%E5%AE%9D%E4%B9%A6%20%E8%80%83%E7%A0%94%E8%8B%B1%E8%AF%AD%E8%AF%8D%E6%B1%87"}], "cat": "english"}]}, {"theme": "张宇高数 + 信号 + 红宝书", "tasks": [{"t": "张宇高数 · 函数·极限·连续（例题）", "d": "张宇练习：函数/极限/连续，看例题+做配套（当前进度）", "l": [{"n": "张宇高数", "u": "https://search.bilibili.com/all?keyword=%E5%BC%A0%E5%AE%87%20%E9%AB%98%E6%95%B0%20%E5%87%BD%E6%95%B0%20%E6%9E%81%E9%99%90%20%E8%BF%9E%E7%BB%AD"}], "cat": "math"}, {"t": "信号与系统 · 学习（{CH}）", "d": "继续学当前章节：概念+例题，没学完不跳章", "l": [{"n": "信号网课", "u": "https://search.bilibili.com/all?keyword=%E4%BF%A1%E5%8F%B7%E4%B8%8E%E7%B3%BB%E7%BB%9F%20%E9%9B%B6%E5%9F%BA%E7%A1%80%20%E9%83%AD%E5%AE%9D%E9%BE%99"}, {"n": "DeepSeek", "u": "https://chat.deepseek.com/"}], "cat": "signal"}, {"t": "信号与系统 · 课后题", "d": "{CH} 课后习题，做完才算完成本章", "l": [{"n": "DeepSeek", "u": "https://chat.deepseek.com/"}], "cat": "signal"}, {"t": "英语 · 红宝书 1 单元", "d": "红宝书精背 1 个单元 + 复习旧词（暂不做真题）", "l": [{"n": "红宝书", "u": "https://search.bilibili.com/all?keyword=%E7%BA%A2%E5%AE%9D%E4%B9%A6%20%E8%80%83%E7%A0%94%E8%8B%B1%E8%AF%AD%E8%AF%8D%E6%B1%87"}], "cat": "english"}]}, {"theme": "张宇高数 + 信号 + 红宝书", "tasks": [{"t": "张宇高数 · 函数·极限·连续（习题）", "d": "张宇练习：习题巩固，错题标注", "l": [{"n": "张宇高数", "u": "https://search.bilibili.com/all?keyword=%E5%BC%A0%E5%AE%87%20%E9%AB%98%E6%95%B0%20%E5%87%BD%E6%95%B0%20%E6%9E%81%E9%99%90%20%E8%BF%9E%E7%BB%AD"}], "cat": "math"}, {"t": "信号与系统 · 学习（{CH}）", "d": "继续学当前章节：概念+例题，没学完不跳章", "l": [{"n": "信号网课", "u": "https://search.bilibili.com/all?keyword=%E4%BF%A1%E5%8F%B7%E4%B8%8E%E7%B3%BB%E7%BB%9F%20%E9%9B%B6%E5%9F%BA%E7%A1%80%20%E9%83%AD%E5%AE%9D%E9%BE%99"}, {"n": "DeepSeek", "u": "https://chat.deepseek.com/"}], "cat": "signal"}, {"t": "信号与系统 · 课后题", "d": "{CH} 课后习题，做完才算完成本章", "l": [{"n": "DeepSeek", "u": "https://chat.deepseek.com/"}], "cat": "signal"}, {"t": "英语 · 红宝书 1 单元", "d": "红宝书精背 1 个单元 + 复习旧词（暂不做真题）", "l": [{"n": "红宝书", "u": "https://search.bilibili.com/all?keyword=%E7%BA%A2%E5%AE%9D%E4%B9%A6%20%E8%80%83%E7%A0%94%E8%8B%B1%E8%AF%AD%E8%AF%8D%E6%B1%87"}], "cat": "english"}]}, {"theme": "张宇高数 + 信号 + 红宝书", "tasks": [{"t": "张宇高数 · 函数·极限·连续（例题）", "d": "张宇练习：函数/极限/连续，看例题+做配套（当前进度）", "l": [{"n": "张宇高数", "u": "https://search.bilibili.com/all?keyword=%E5%BC%A0%E5%AE%87%20%E9%AB%98%E6%95%B0%20%E5%87%BD%E6%95%B0%20%E6%9E%81%E9%99%90%20%E8%BF%9E%E7%BB%AD"}], "cat": "math"}, {"t": "信号与系统 · 学习（{CH}）", "d": "继续学当前章节：概念+例题，没学完不跳章", "l": [{"n": "信号网课", "u": "https://search.bilibili.com/all?keyword=%E4%BF%A1%E5%8F%B7%E4%B8%8E%E7%B3%BB%E7%BB%9F%20%E9%9B%B6%E5%9F%BA%E7%A1%80%20%E9%83%AD%E5%AE%9D%E9%BE%99"}, {"n": "DeepSeek", "u": "https://chat.deepseek.com/"}], "cat": "signal"}, {"t": "信号与系统 · 本周复习", "d": "重做 {CH} 错题，搭章节框架", "l": [{"n": "DeepSeek", "u": "https://chat.deepseek.com/"}], "cat": "signal"}, {"t": "英语 · 红宝书 1 单元", "d": "红宝书精背 1 个单元 + 复习旧词（暂不做真题）", "l": [{"n": "红宝书", "u": "https://search.bilibili.com/all?keyword=%E7%BA%A2%E5%AE%9D%E4%B9%A6%20%E8%80%83%E7%A0%94%E8%8B%B1%E8%AF%AD%E8%AF%8D%E6%B1%87"}], "cat": "english"}]}, {"theme": "技术日：PID 入门 + 项目", "tasks": [{"t": "张宇高数 · 函数·极限·连续（巩固）", "d": "本周函数极限连续错题+典型题巩固", "l": [{"n": "张宇高数", "u": "https://search.bilibili.com/all?keyword=%E5%BC%A0%E5%AE%87%20%E9%AB%98%E6%95%B0%20%E5%87%BD%E6%95%B0%20%E6%9E%81%E9%99%90%20%E8%BF%9E%E7%BB%AD"}], "cat": "math"}, {"t": "信号与系统 · 全国真题", "d": "当前章节 + 第2/3/4/7/8章真题，蜂考858", "l": [{"n": "蜂考858真题", "u": "https://search.bilibili.com/all?keyword=%E8%9C%82%E8%80%83%20%E7%94%B5%E5%AD%90%E7%A7%91%E5%A4%A7%20858%20%E4%BF%A1%E5%8F%B7%E4%B8%8E%E7%B3%BB%E7%BB%9F%20%E7%9C%9F%E9%A2%98"}], "cat": "signal"}, {"t": "PID 控制 · 入门（原理）", "d": "本周主题：比例(P)/积分(I)/微分(D)各自作用，先搞懂原理再谈实验", "l": [{"n": "PID 入门", "u": "https://search.bilibili.com/all?keyword=PID%20%E6%8E%A7%E5%88%B6%20%E9%80%9A%E4%BF%97%20%E5%8E%9F%E7%90%86%20%E5%85%A5%E9%97%A8"}], "cat": "embedded"}, {"t": "项目 · 灵弦画板子", "d": "立创EDA：原理图/封装/布线", "l": [{"n": "立创EDA PCB", "u": "https://search.bilibili.com/all?keyword=%E7%AB%8B%E5%88%9BEDA%E4%B8%93%E4%B8%9A%E7%89%88%20PCB%E8%AE%BE%E8%AE%A1"}, {"n": "嘉立创打样", "u": "https://www.jlc.com/"}], "cat": "project"}, {"t": "项目 · 生态之瞳", "d": "陆空一体：ESP32 嵌入式推进", "l": [{"n": "ESP32 ESP-IDF", "u": "https://search.bilibili.com/all?keyword=ESP32%20ESP-IDF%20%E5%BC%80%E5%8F%91"}, {"n": "DeepSeek", "u": "https://chat.deepseek.com/"}], "cat": "project"}]}], "signalChapters": [{"c": "第1章 信号与系统基本概念（信号运算·奇异信号·系统性质）", "s": 2}, {"c": "第2章 连续时间系统时域分析（卷积·LTI 系统）", "s": 3}, {"c": "第3章 傅里叶变换（连续时间·频谱分析）", "s": 3}, {"c": "第4章 拉普拉斯变换（复频域·系统函数）", "s": 3}, {"c": "第5章 离散时间系统时域分析", "s": 2}, {"c": "第6章 Z 变换（离散频域分析）", "s": 2}, {"c": "第7章 系统函数与稳定性分析", "s": 3}, {"c": "第8章 采样定理（连续↔离散桥梁）", "s": 3}], "footer": "每天学完用 deepseek-v4-flash 复盘答疑（chat.deepseek.com）", "footerLink": "https://www.baidu.com/s?wd=%E7%94%B5%E5%AD%90%E7%A7%91%E6%8A%80%E5%A4%A7%E5%AD%A6%20%E7%A0%94%E7%A9%B6%E7%94%9F%E6%8B%9B%E7%94%9F%E7%BD%91%20%E4%BF%A1%E6%81%AF%E4%B8%8E%E9%80%9A%E4%BF%A1%E5%B7%A5%E7%A8%8B%E5%AD%A6%E9%99%A2", "labels": {"dailyHeader": "每天固定", "tasksHeader": "今日任务", "sigHeader": "858 信号与系统 考点进度（零基础打牢，★=考研重点）", "themePrefix": "今日主题：", "closeHint": "点右上角 × 或按 Esc 关闭", "uestcLabel": "电子科技大学研究生招生网", "boostHeader": "今日重点补强（来自昨日复盘）", "reviewTitle": "今日复盘", "reviewSub": "一天学习结束，回顾今天的完成情况", "reviewCompletion": "完成情况", "reviewMastery": "掌握度", "reviewDone": "完成", "reviewPartial": "部分", "reviewMissed": "没做", "reviewEasy": "轻松", "reviewMid": "一般", "reviewHard": "吃力", "reviewNote": "备注（今天卡在哪 / 明天想加强什么）", "reviewSubmit": "保存复盘", "summaryTitle": "昨日复盘", "cdPrefix": "距初试还有", "cdSuffix": "天", "cdToday": "今天就是初试！", "cdPast": "初试已过", "msToday": "里程碑（就是今天）：", "msSoon": "天后里程碑："}, "special": {}, "countdown": {"targetDate": "2027-12-18", "targetLabel": "2028 考研初试（政治·英语一·数学一·858）"}, "milestones": [{"date": "2026-09-01", "label": "基础期启动（现在！）"}, {"date": "2027-04-30", "label": "基础期结束 → 强化期开始"}, {"date": "2027-08-31", "label": "强化期结束 → 真题期开始"}, {"date": "2027-09-15", "label": "考研大纲发布（关注）"}, {"date": "2027-09-24", "label": "预报名开始"}, {"date": "2027-10-08", "label": "正式报名开始"}, {"date": "2027-10-31", "label": "真题期结束 → 冲刺期开始"}, {"date": "2027-11-05", "label": "网上确认"}, {"date": "2027-12-10", "label": "打印准考证"}, {"date": "2027-12-18", "label": "初试开考！"}], "quotes": ["信号不会说谎，傅里叶会告诉你真相。", "每一个卷积，都是过去对现在的积累。", "考研如滤波：滤掉浮躁，留下专注。", "嵌入式工程师的浪漫，是用代码点亮硬件。", "今天的 C 语言，是明天的核心竞争力。", "单片机教会我：最小系统也能跑出大世界。", "别怕零基础，怕的是不开始。", "858 信号与系统，是你通向成电的第一块敲门砖。", "数学一没有捷径，只有一遍遍的真题。", "单词背了会忘，但背了就比不背强。", "画板子如绣花，耐心出精品。", "灵弦的每一根弦，都是你敲出来的未来。", "ESP32 很小，装得下你的大梦想。", "今天的坚持，是明年成电录取通知书上的墨迹。", "考研是一场长跑，慢一点没关系，别停。", "傅里叶说：任何复杂信号都能分解成简单正弦波，你也能。", "拉普拉斯变换：把难题换到 S 域，往往豁然开朗。", "采样定理告诉我们：别漏掉人生的关键帧。", "系统要稳定，心态更要稳定。", "代码虐我千百遍，我待代码如初恋。", "每天 660 题的一小步，是数学一的一大步。", "嵌入式 = 软硬结合，你正走在最硬的路上。", "立创EDA 画的不只是板子，是你的工程思维。", "错题本是考研人最值钱的资产。", "别人刷短视频，你刷真题——这就是差距。", "考研没有白走的路，每一步都算数。", "成电是一座山，而你正在登山。", "不背单词 App 又催你了，去点掉它。", "你写下的每一行代码，都在为复试加码。", "2028 年 9 月，成电见。"], "weekTheme": "PID 控制（入门·原理）"};
+const PROGRESS = {"signal": {"chapter": 1, "updated": "2026-08-26"}};
+
+const now = new Date();
+const dayNames = PLAN.dayNames;
+const dow = now.getDay();
+const todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+
+const target = new Date(PLAN.countdown.targetDate + 'T00:00:00');
+const cdDays = Math.ceil((target - now) / 86400000);
+
+let sigChapter = 1;
+if (PROGRESS.signal && PROGRESS.signal.chapter) sigChapter = parseInt(PROGRESS.signal.chapter);
+let sigName = '';
+if (PLAN.signalChapters && sigChapter >= 1 && sigChapter <= PLAN.signalChapters.length) {
+  sigName = PLAN.signalChapters[sigChapter-1].c;
+}
+function fmt(s){ return s ? String(s).split('{CH}').join(sigName) : s; }
+
+document.getElementById('goal').textContent = PLAN.goal;
+document.getElementById('date').textContent = todayStr + '  ' + dayNames[dow];
+if (cdDays > 0) document.getElementById('cd').innerHTML = '距初试还有 <b>' + cdDays + '</b> 天';
+else if (cdDays === 0) document.getElementById('cd').textContent = '今天就是初试！';
+else document.getElementById('cd').textContent = '初试已过 ' + (-cdDays) + ' 天';
+
+let msgs = [];
+if (PLAN.milestones) {
+  PLAN.milestones.forEach(function(m){
+    const md = new Date(m.date + 'T00:00:00');
+    const diff = Math.ceil((md - now) / 86400000);
+    if (diff === 0) msgs.push('🚨 里程碑：' + m.label + '（就是今天！）');
+    else if (diff > 0 && diff <= 7) msgs.push('⏳ ' + diff + ' 天后里程碑：' + m.label);
+  });
+}
+document.getElementById('msgs').innerHTML = msgs.map(function(x){return '<div class="ms">'+x+'</div>';}).join('');
+
+if (PLAN.weekTheme) { document.getElementById('wt').style.display='block'; document.getElementById('wt').textContent = PLAN.weekTheme; }
+
+function renderTask(t){
+  const id = 't_' + Math.random().toString(36).slice(2);
+  const done = localStorage.getItem(id) === '1';
+  const lk = (t.l && t.l.length) ? '<div class="lk">' + t.l.map(function(x){return '<a href="'+x.u+'">'+x.n+'</a>';}).join('') + '</div>' : '';
+  return '<div class="task"><div class="row"><div class="ck'+(done?' on':'')+'" id="'+id+'">'+(done?'✓':'')+'</div><div style="flex:1"><div class="t'+(done?' done':'')+'">'+fmt(t.t)+'</div>'+(t.d?'<div class="d">'+fmt(t.d)+'</div>':'')+lk+'</div></div></div>';
+}
+
+let dailyHtml = '';
+PLAN.daily.forEach(function(t){ dailyHtml += renderTask(t); });
+document.getElementById('daily').innerHTML = dailyHtml;
+
+const day = PLAN.weekly[dow];
+let taskHtml = '';
+day.tasks.forEach(function(t){ taskHtml += renderTask(t); });
+document.getElementById('tasks').innerHTML = taskHtml;
+
+let sigHtml = '';
+PLAN.signalChapters.forEach(function(c, i){
+  const stars = '★'.repeat(c.s || 0);
+  const cur = (i+1 === sigChapter) ? ' cur' : '';
+  const tag = (i+1 === sigChapter) ? '<span class="tag">当前</span>' : '';
+  sigHtml += '<div class="s'+cur+'"><span>□ '+c.c+'</span><span class="star">'+stars+'</span>'+tag+'</div>';
+});
+document.getElementById('sig').innerHTML = sigHtml;
+
+if (PLAN.quotes && PLAN.quotes.length) {
+  document.getElementById('quote').textContent = '“' + PLAN.quotes[Math.floor(Math.random()*PLAN.quotes.length)] + '”';
+}
+document.getElementById('ft').innerHTML = PLAN.footer;
+
+document.querySelectorAll('.ck').forEach(function(el){
+  el.addEventListener('click', function(){
+    const on = el.classList.contains('on');
+    if (on) { el.classList.remove('on'); el.textContent=''; localStorage.removeItem(el.id); }
+    else { el.classList.add('on'); el.textContent='✓'; localStorage.setItem(el.id,'1'); }
+    const t = el.parentElement.querySelector('.t');
+    if (t) t.classList.toggle('done', !on);
+  });
+});
+</script>
+</body>
+</html>
