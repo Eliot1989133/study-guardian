@@ -37,6 +37,8 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
 .qt{background:rgba(255,255,255,.75);margin:12px;padding:12px 14px;border-radius:14px;font-size:13px;color:#6366f1;border-left:3px solid #a78bfa;font-style:italic;}
 .ft{color:#9ca3af;font-size:11px;text-align:center;margin-top:18px;line-height:1.7;}
 .ms{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;margin:10px 12px 0;padding:10px 14px;border-radius:12px;font-size:13px;font-weight:600;}
+.stip{background:linear-gradient(135deg,#10b981,#059669);color:#fff;margin:10px 12px 0;padding:10px 14px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 2px 6px rgba(16,185,129,.25);}
+.stip.stay{background:linear-gradient(135deg,#f59e0b,#d97706);}
 </style>
 </head>
 <body>
@@ -46,6 +48,7 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
   <div class="cd" id="cd"></div>
 </div>
 <div id="msgs"></div>
+<div class="stip" id="settleTip" style="display:none"></div>
 <div class="wt" id="wt" style="display:none"></div>
 <div class="sec">每天固定</div>
 <div id="daily"></div>
@@ -65,6 +68,7 @@ function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+pad2(d.getMo
 
 // ===== 日结算：跨天时按「昨天是否勾完信号课后题」推进章节 =====
 let sigChapter = 1;
+let settleTip = null;
 (function settle(){
   let ch = parseInt(localStorage.getItem('sigChapter'), 10);
   if (!ch || isNaN(ch) || ch < 1) {
@@ -75,7 +79,9 @@ let sigChapter = 1;
   if (last && last !== today) {
     try {
       const y = JSON.parse(localStorage.getItem('done_' + last) || '{}');
-      if (y && y.sigEx && ch < MAX_CH) ch += 1;
+      const hadAny = Object.keys(y || {}).length > 0;
+      if (y && y.sigEx && ch < MAX_CH) { ch += 1; settleTip = {adv:true}; }
+      else if (hadAny) { settleTip = {adv:false}; }
     } catch(e){}
     // 清理 7 天前的记录
     try { for (let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k && k.indexOf('done_')===0 && k < 'done_' + today){ localStorage.removeItem(k); } } } catch(e){}
@@ -114,6 +120,20 @@ if (PLAN.milestones) {
   });
 }
 document.getElementById('msgs').innerHTML = msgs.map(function(x){return '<div class="ms">'+x+'</div>';}).join('');
+
+// 新一天结算提示：信号推进 or 停留
+if (settleTip) {
+  const st = document.getElementById('settleTip');
+  const cur = PLAN.signalChapters[sigChapter-1];
+  const nm = cur ? cur.c : '';
+  st.style.display = 'block';
+  if (settleTip.adv) {
+    st.innerHTML = '🌅 新的一天 · 昨日信号完成 → 今日进入：' + nm;
+  } else {
+    st.classList.add('stay');
+    st.innerHTML = '📌 昨日信号课后题未勾 → 停留：' + nm + '（勾「课后题」才自动推进）';
+  }
+}
 
 if (PLAN.weekTheme) { document.getElementById('wt').style.display='block'; document.getElementById('wt').textContent = PLAN.weekTheme; }
 
